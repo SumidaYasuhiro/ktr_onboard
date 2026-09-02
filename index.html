@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Story Mock</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    #app {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: #000;
+    }
+
+    .media {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    /* #storyImage {
+      cursor: pointer;
+    } */
+
+    #storyImage {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    #soundButton,
+    #startButton {
+      position: fixed;
+      z-index: 2;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .7);
+      background: rgba(0, 0, 0, .62);
+      font: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #soundButton {
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      padding: 8px 12px;
+      border-radius: 999px;
+    }
+
+    #startButton {
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <main id="app">
+    <video
+      id="openingVideo"
+      class="media"
+      src="resource/000.mp4"
+      autoplay
+      muted
+      playsinline
+      preload="auto"
+      disablepictureinpicture
+    ></video>
+
+    <img id="storyImage" class="media" src="" alt="ストーリー画像" hidden>
+
+    <button id="soundButton" type="button">音声 ON</button>
+    <button id="startButton" type="button" hidden>タップして開始</button>
+  </main>
+
+  <script>
+    // 画像を増やす場合は、この配列へ表示順にファイル名を追加してください。
+    const imageFiles = [
+      "resource/_p010.png",
+      "resource/_p020.png",
+      "resource/_p030.png",
+      "resource/_p040.png",
+      "resource/_p050.png",
+      "resource/_p060.png",
+      "resource/_p070.png",
+      "resource/_p080.png",
+      "resource/_p090.png",
+      "resource/_p100.png",
+      "resource/_p110.png",
+      "resource/_p120.png",
+      "resource/020.png",
+      "resource/030.png",
+      "resource/040.png",
+      "resource/050.png",
+      "resource/060.png",
+      "resource/061.png",
+      "resource/070.png",
+      "resource/080.png",
+      "resource/090.png",
+      "resource/100.png",
+      "resource/110.png",
+      "resource/120.png",
+      "resource/130.png",
+      "resource/140.png",
+      "resource/150.png",
+      "resource/160.png",
+      "resource/170.png",
+      "resource/180.png",
+      "resource/190.png",
+      "resource/200.png",
+      "resource/210.png",
+      "resource/211.png",
+      "resource/220.png",
+      "resource/230.png",
+      "resource/240.png",
+      "resource/250.png",
+      "resource/260.png",
+      "resource/270.png",
+      "resource/280.png",
+      "resource/290.png",
+      "resource/300.png",
+      "resource/301.png",
+      "resource/302.png",
+      "resource/310.png",
+      "resource/320.png",
+      "resource/330.png",
+      "resource/340.png",
+      "resource/350.png",
+      "resource/360.png",
+      "resource/370.png",
+      "resource/380.png",
+      "resource/390.png",
+      "resource/400.png",
+      "resource/410.png",
+      "resource/420.png",
+      "resource/430.png",
+      "resource/440.png",
+      "resource/450.png",
+      "resource/460.png",
+      "resource/470.png",
+      "resource/471.png",
+      "resource/480.png",
+      "resource/490.png",
+      "resource/500.png",
+      "resource/501.png",
+      "resource/502.png",
+      "resource/503.png",
+      "resource/510.png",
+      "resource/520.png",
+      "resource/530.png",
+      "resource/540.png",
+      "resource/550.png",
+      "resource/560.png",
+      "resource/570.png",
+      "resource/580.png"
+    ];
+
+    const video = document.querySelector("#openingVideo");
+    const storyImage = document.querySelector("#storyImage");
+    const soundButton = document.querySelector("#soundButton");
+    const startButton = document.querySelector("#startButton");
+    let currentImageIndex = 0;
+
+    // 2枚目以降も先に読み込み、タップ後の切り替えを滑らかにする。
+    imageFiles.forEach((file) => {
+      const image = new Image();
+      image.src = file;
+    });
+
+    function showFirstImage() {
+      video.hidden = true;
+      soundButton.hidden = true;
+      startButton.hidden = true;
+      currentImageIndex = 0;
+      storyImage.src = imageFiles[currentImageIndex];
+      storyImage.hidden = false;
+    }
+
+    function showNextImage() {
+      if (currentImageIndex >= imageFiles.length - 1) return;
+      currentImageIndex += 1;
+      storyImage.src = imageFiles[currentImageIndex];
+    }
+
+    async function tryAutoplay() {
+      try {
+        await video.play();
+      } catch {
+        startButton.hidden = false;
+      }
+    }
+
+    video.addEventListener("ended", showFirstImage);
+    video.addEventListener("error", showFirstImage);
+    storyImage.addEventListener("click", showNextImage);
+
+    soundButton.addEventListener("click", async () => {
+      video.muted = !video.muted;
+      soundButton.textContent = video.muted ? "音声 ON" : "音声 OFF";
+      await video.play();
+    });
+
+    startButton.addEventListener("click", async () => {
+      startButton.hidden = true;
+      await video.play();
+    });
+
+    tryAutoplay();
+  </script>
+</body>
+</html>
