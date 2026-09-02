@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
-  <meta name="mobile-web-app-capable" content="yes"> //追加
-  <meta name="apple-mobile-web-app-capable" content="yes"> //追加
-  <meta name="apple-mobile-web-app-status-bar-style" content="black"> //追加
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <title>Story Mock</title>
   <style>
     * { box-sizing: border-box; }
@@ -39,10 +39,6 @@
       object-position: center;
     }
 
-    /* #storyImage {
-      cursor: pointer;
-    } */
-
     #storyImage {
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
@@ -52,33 +48,7 @@
     [hidden] {
       display: none !important;
     }
-
-    /* #soundButton,
-    #startButton {
-      position: fixed;
-      z-index: 2;
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, .7);
-      background: rgba(0, 0, 0, .62);
-      font: inherit;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #soundButton {
-      top: max(12px, env(safe-area-inset-top));
-      right: max(12px, env(safe-area-inset-right));
-      padding: 8px 12px;
-      border-radius: 999px;
-    }
-
-    #startButton {
-      inset: 50% auto auto 50%;
-      transform: translate(-50%, -50%);
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 16px;
-    } */
+    
   </style>
 </head>
 <body>
@@ -95,9 +65,6 @@
     ></video>
 
     <img id="storyImage" class="media" src="" alt="ストーリー画像" hidden>
-
-    <!-- <button id="soundButton" type="button">音声 ON</button> -->
-    <!-- <button id="startButton" type="button" hidden>タップして開始</button> -->
   </main>
 
   <script>
@@ -184,53 +151,46 @@
 
     const video = document.querySelector("#openingVideo");
     const storyImage = document.querySelector("#storyImage");
-    // const soundButton = document.querySelector("#soundButton");
-    // const startButton = document.querySelector("#startButton");
     let currentImageIndex = 0;
 
-    // 2枚目以降も先に読み込み、タップ後の切り替えを滑らかにする。
-    // imageFiles.forEach((file) => {
-    //   const image = new Image();
-    //   image.src = file;
-    // });
+    function preloadImage(index) {
+      if (index >= imageFiles.length) return;
+    
+      const image = new Image();
+      image.src = imageFiles[index];
+    }
 
     function showFirstImage() {
       video.hidden = true;
-      // soundButton.hidden = true;
-      // startButton.hidden = true;
       currentImageIndex = 0;
       storyImage.src = imageFiles[currentImageIndex];
       storyImage.hidden = false;
+      // 次の1枚だけ先読み
+      preloadImage(currentImageIndex + 1);
     }
 
     function showNextImage() {
       if (currentImageIndex >= imageFiles.length - 1) return;
       currentImageIndex += 1;
       storyImage.src = imageFiles[currentImageIndex];
+      // 次の1枚だけ先読み
+      preloadImage(currentImageIndex + 1);
     }
 
     async function tryAutoplay() {
       try {
         await video.play();
       } catch {
-        // startButton.hidden = false;
       }
     }
 
+    video.addEventListener("playing", () => {
+      preloadImage(0);
+    }, { once: true });
+    
     video.addEventListener("ended", showFirstImage);
     video.addEventListener("error", showFirstImage);
     storyImage.addEventListener("click", showNextImage);
-
-    // soundButton.addEventListener("click", async () => {
-    //   video.muted = !video.muted;
-    //   soundButton.textContent = video.muted ? "音声 ON" : "音声 OFF";
-    //   await video.play();
-    // });
-
-    // startButton.addEventListener("click", async () => {
-    //   startButton.hidden = true;
-    //   await video.play();
-    // });
 
     tryAutoplay();
   </script>
