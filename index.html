@@ -2,10 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
+
   <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -35,6 +37,7 @@
       inset: 0;
       display: grid;
       place-items: center;
+      overflow: hidden;
       background: #000;
     }
 
@@ -52,33 +55,30 @@
       outline: none;
     }
 
+    /*
+     * 軽量版タイマー表示
+     */
+
     #elapsedTimer {
-      position: fixed;
+      position: absolute;
       top: 50%;
       left: 50%;
       z-index: 10;
-      transform: translate(-50%, -50%);
+      transform: translate3d(-50%, -50%, 0);
 
       width: 34vw;
       text-align: center;
 
       color: #fff;
-      font-family: "Arial Black", Arial, sans-serif;
+      font-family: Arial, sans-serif;
       font-size: clamp(34px, 9vw, 72px);
       font-weight: 900;
       font-variant-numeric: tabular-nums;
       line-height: 1;
 
       -webkit-text-stroke: 2px #e00000;
-      paint-order: stroke fill;
 
-      text-shadow:
-        2px 2px 0 #e00000,
-        -2px 2px 0 #e00000,
-        2px -2px 0 #e00000,
-        -2px -2px 0 #e00000;
-
-      /* タイマー部分をタップしても画像へタップが届く */
+      /* タイマー部分をタップしても画像へ届く */
       pointer-events: none;
       user-select: none;
     }
@@ -114,7 +114,10 @@
   </main>
 
   <script>
-    // 画像は、この配列に書いた順番で表示されます。
+    /*
+     * 画像の表示順
+     */
+
     const imageFiles = [
       "resource/_p010.png",
       "resource/_p020.png",
@@ -195,9 +198,18 @@
       "resource/580.png"
     ];
 
-    const video = document.querySelector("#openingVideo");
-    const storyImage = document.querySelector("#storyImage");
-    const elapsedTimer = document.querySelector("#elapsedTimer");
+    /*
+     * 使用する画面要素
+     */
+
+    const video =
+      document.querySelector("#openingVideo");
+
+    const storyImage =
+      document.querySelector("#storyImage");
+
+    const elapsedTimer =
+      document.querySelector("#elapsedTimer");
 
     let currentImageIndex = 0;
 
@@ -231,11 +243,17 @@
       timerStartedAt = performance.now();
       elapsedTimer.textContent = "00:00";
 
+      /*
+       * 1秒に1回だけ更新する軽量版
+       */
       timerIntervalId =
-        setInterval(updateTimer, 200);
+        setInterval(updateTimer, 1000);
     }
 
     function stopTimer() {
+      /*
+       * 停止直前の正確な秒数を表示
+       */
       updateTimer();
 
       if (timerIntervalId !== null) {
@@ -250,7 +268,10 @@
 
     const preloadedImages = new Map();
 
-    function preloadImagesFrom(startIndex, count = 10) {
+    function preloadImagesFrom(
+      startIndex,
+      count = 10
+    ) {
       const endIndex = Math.min(
         startIndex + count,
         imageFiles.length
@@ -286,12 +307,16 @@
 
       storyImage.hidden = false;
 
-      // 先の10枚を準備
+      /*
+       * 先の10枚を準備
+       */
       preloadImagesFrom(
         currentImageIndex + 1
       );
 
-      // 画像が1枚だけの場合は、ここで終了
+      /*
+       * 画像が1枚だけならここで終了
+       */
       if (
         currentImageIndex ===
         imageFiles.length - 1
@@ -305,7 +330,9 @@
      */
 
     function showNextImage() {
-      // 最後の画像では何もしない
+      /*
+       * 最後の画像では何もしない
+       */
       if (
         currentImageIndex >=
         imageFiles.length - 1
@@ -318,12 +345,16 @@
       storyImage.src =
         imageFiles[currentImageIndex];
 
-      // 通過した画像を先読みリストから外す
+      /*
+       * 通過した画像を先読みリストから外す
+       */
       preloadedImages.delete(
         currentImageIndex - 1
       );
 
-      // 最後の画像を表示した瞬間に停止
+      /*
+       * 最後の画像を表示した瞬間に停止
+       */
       if (
         currentImageIndex ===
         imageFiles.length - 1
@@ -332,7 +363,9 @@
         return;
       }
 
-      // 常に先の10枚を準備
+      /*
+       * 常に先の10枚を準備
+       */
       preloadImagesFrom(
         currentImageIndex + 1
       );
@@ -346,33 +379,52 @@
       try {
         await video.play();
       } catch {
-        // 自動再生できなかった場合も、
-        // タイマーはそのまま進みます。
+        /*
+         * 自動再生に失敗しても
+         * タイマーはそのまま進みます。
+         */
       }
     }
 
     /*
-     * イベント設定
+     * 動画が再生されてから5秒後に
+     * 最初の10枚を先読みします。
+     *
+     * 動画の読み込みを優先するため、
+     * 画像をすぐには読み込みません。
      */
 
     video.addEventListener(
       "playing",
       () => {
-        // 動画再生中に最初の10枚を準備
-        preloadImagesFrom(0);
+        setTimeout(() => {
+          preloadImagesFrom(0);
+        }, 5000);
       },
       { once: true }
     );
+
+    /*
+     * 動画終了時
+     */
 
     video.addEventListener(
       "ended",
       showFirstImage
     );
 
+    /*
+     * 動画エラー時は画像へ進む
+     */
+
     video.addEventListener(
       "error",
       showFirstImage
     );
+
+    /*
+     * 画像タップ時
+     */
 
     storyImage.addEventListener(
       "click",
