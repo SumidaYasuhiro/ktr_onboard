@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes"> //追加
+  <meta name="apple-mobile-web-app-capable" content="yes"> //追加
+  <meta name="apple-mobile-web-app-status-bar-style" content="black"> //追加
   <title>Story Mock</title>
   <style>
     * { box-sizing: border-box; }
@@ -50,7 +53,7 @@
       display: none !important;
     }
 
-    #soundButton,
+    /* #soundButton,
     #startButton {
       position: fixed;
       z-index: 2;
@@ -75,7 +78,7 @@
       padding: 12px 20px;
       border-radius: 10px;
       font-size: 16px;
-    }
+    } */
   </style>
 </head>
 <body>
@@ -93,8 +96,8 @@
 
     <img id="storyImage" class="media" src="" alt="ストーリー画像" hidden>
 
-    <button id="soundButton" type="button">音声 ON</button>
-    <button id="startButton" type="button" hidden>タップして開始</button>
+    <!-- <button id="soundButton" type="button">音声 ON</button> -->
+    <!-- <button id="startButton" type="button" hidden>タップして開始</button> -->
   </main>
 
   <script>
@@ -181,8 +184,8 @@
 
     const video = document.querySelector("#openingVideo");
     const storyImage = document.querySelector("#storyImage");
-    const soundButton = document.querySelector("#soundButton");
-    const startButton = document.querySelector("#startButton");
+    // const soundButton = document.querySelector("#soundButton");
+    // const startButton = document.querySelector("#startButton");
     let currentImageIndex = 0;
 
     // 2枚目以降も先に読み込み、タップ後の切り替えを滑らかにする。
@@ -193,8 +196,8 @@
 
     function showFirstImage() {
       video.hidden = true;
-      soundButton.hidden = true;
-      startButton.hidden = true;
+      // soundButton.hidden = true;
+      // startButton.hidden = true;
       currentImageIndex = 0;
       storyImage.src = imageFiles[currentImageIndex];
       storyImage.hidden = false;
@@ -210,7 +213,7 @@
       try {
         await video.play();
       } catch {
-        startButton.hidden = false;
+        // startButton.hidden = false;
       }
     }
 
@@ -218,16 +221,16 @@
     video.addEventListener("error", showFirstImage);
     storyImage.addEventListener("click", showNextImage);
 
-    soundButton.addEventListener("click", async () => {
-      video.muted = !video.muted;
-      soundButton.textContent = video.muted ? "音声 ON" : "音声 OFF";
-      await video.play();
-    });
+    // soundButton.addEventListener("click", async () => {
+    //   video.muted = !video.muted;
+    //   soundButton.textContent = video.muted ? "音声 ON" : "音声 OFF";
+    //   await video.play();
+    // });
 
-    startButton.addEventListener("click", async () => {
-      startButton.hidden = true;
-      await video.play();
-    });
+    // startButton.addEventListener("click", async () => {
+    //   startButton.hidden = true;
+    //   await video.play();
+    // });
 
     tryAutoplay();
   </script>
