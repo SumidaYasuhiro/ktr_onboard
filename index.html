@@ -153,11 +153,21 @@
     const storyImage = document.querySelector("#storyImage");
     let currentImageIndex = 0;
 
-    function preloadImage(index) {
-      if (index >= imageFiles.length) return;
+    const preloadedImages = new Map();
     
-      const image = new Image();
-      image.src = imageFiles[index];
+    function preloadImagesFrom(startIndex, count = 5) {
+      const endIndex = Math.min(
+        startIndex + count,
+        imageFiles.length
+      );
+    
+      for (let index = startIndex; index < endIndex; index += 1) {
+        if (preloadedImages.has(index)) continue;
+    
+        const image = new Image();
+        image.src = imageFiles[index];
+        preloadedImages.set(index, image);
+      }
     }
 
     function showFirstImage() {
@@ -165,17 +175,45 @@
       currentImageIndex = 0;
       storyImage.src = imageFiles[currentImageIndex];
       storyImage.hidden = false;
-      // 次の1枚だけ先読み
-      preloadImage(currentImageIndex + 1);
+    
+      // 5枚先まで準備
+      preloadImagesFrom(currentImageIndex + 1);
     }
 
     function showNextImage() {
       if (currentImageIndex >= imageFiles.length - 1) return;
+    
       currentImageIndex += 1;
       storyImage.src = imageFiles[currentImageIndex];
-      // 次の1枚だけ先読み
-      preloadImage(currentImageIndex + 1);
+      // 1つ前の画像を先読みリストから外す
+      preloadedImages.delete(currentImageIndex - 1);
+      // 常に5枚先まで準備
+      preloadImagesFrom(currentImageIndex + 1);
     }
+    
+    // function preloadImage(index) {
+    //   if (index >= imageFiles.length) return;
+    
+    //   const image = new Image();
+    //   image.src = imageFiles[index];
+    // }
+
+    // function showFirstImage() {
+    //   video.hidden = true;
+    //   currentImageIndex = 0;
+    //   storyImage.src = imageFiles[currentImageIndex];
+    //   storyImage.hidden = false;
+    //   // 次の1枚だけ先読み
+    //   preloadImage(currentImageIndex + 1);
+    // }
+
+    // function showNextImage() {
+    //   if (currentImageIndex >= imageFiles.length - 1) return;
+    //   currentImageIndex += 1;
+    //   storyImage.src = imageFiles[currentImageIndex];
+    //   // 次の1枚だけ先読み
+    //   preloadImage(currentImageIndex + 1);
+    // }
 
     async function tryAutoplay() {
       try {
@@ -185,8 +223,12 @@
     }
 
     video.addEventListener("playing", () => {
-      preloadImage(0);
+      preloadImagesFrom(0);
     }, { once: true });
+    
+    // video.addEventListener("playing", () => {
+    //   preloadImage(0);
+    // }, { once: true });
     
     video.addEventListener("ended", showFirstImage);
     video.addEventListener("error", showFirstImage);
